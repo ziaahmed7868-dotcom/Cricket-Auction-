@@ -211,8 +211,15 @@
             color: #e2e8f0;
         }
 
-        .timer-box {
+        /* Timer and Admin Container Side */
+        .right-panel {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timer-box {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -294,55 +301,20 @@
             color: #feb2b2;
         }
 
-        .counter-grid {
-            background: #0d1117;
-            border: 1px solid #d69e2e;
-            border-radius: 8px;
-            padding: 10px;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            text-align: center;
-        }
-
-        .counter-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #2d3748;
-        }
-
-        .counter-label {
-            font-size: 0.75rem;
-            color: #a0aec0;
-            display: block;
-        }
-
-        .counter-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #ecc94b;
-        }
-
-        .counter-total {
-            background: #742a2a;
-            border-color: #e53e3e;
-        }
-
-        /* Admin Floating Button */
+        /* Admin Button Positioned below timer */
         .admin-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
             background: #e53e3e;
             color: #fff;
             border: 1px solid #feb2b2;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            width: 100%;
             display: none;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
         }
 
         /* Admin Control Modal */
@@ -451,11 +423,15 @@
                     </div>
                 </div>
 
-                <div class="timer-box">
-                    <span style="font-size: 0.85rem; margin-bottom: 6px; color: #a0aec0;">PIE-STYLE TIMER</span>
-                    <div class="pie-timer">
-                        <div class="timer-inner" id="timerValue">02</div>
+                <div class="right-panel">
+                    <div class="timer-box">
+                        <span style="font-size: 0.85rem; margin-bottom: 6px; color: #a0aec0;">PIE-STYLE TIMER</span>
+                        <div class="pie-timer">
+                            <div class="timer-inner" id="timerValue">02</div>
+                        </div>
                     </div>
+                    <!-- ADMIN BUTTON (Visible only for Admin below timer) -->
+                    <button class="admin-btn" id="adminBtn" onclick="openAdminModal()">ADMIN CONTROLS</button>
                 </div>
             </div>
 
@@ -475,19 +451,6 @@
                     PURSE SPENT: <span id="spentPurse">46.5 CR</span>
                 </div>
             </div>
-
-            <div class="counter-grid">
-                <div class="counter-item"><span class="counter-label">BAT</span><span class="counter-value" id="cntBat">1</span></div>
-                <div class="counter-item"><span class="counter-label">BOWL</span><span class="counter-value" id="cntBowl">0</span></div>
-                <div class="counter-item"><span class="counter-label">WK</span><span class="counter-value" id="cntWk">1</span></div>
-                <div class="counter-item"><span class="counter-label">AR</span><span class="counter-value" id="cntAr">1</span></div>
-                <div class="counter-item"><span class="counter-label">DOM</span><span class="counter-value" id="cntDom">2</span></div>
-                <div class="counter-item"><span class="counter-label">OVS</span><span class="counter-value" id="cntOvs">1</span></div>
-                <div class="counter-item counter-total"><span class="counter-label" style="color: #fff;">TOTAL</span><span class="counter-value" style="color: #fff;" id="cntTotal">3/15</span></div>
-            </div>
-
-            <!-- ADMIN BUTTON (Visible only for Admin) -->
-            <button class="admin-btn" id="adminFloatingBtn" onclick="openAdminModal()">ADMIN</button>
 
         </div>
     </div>
@@ -532,7 +495,7 @@
         function goToAuctionAsFranchise() {
             document.getElementById('screen1').classList.remove('active');
             document.getElementById('screen2').classList.add('active');
-            document.getElementById('adminFloatingBtn').style.display = 'none'; // Hide admin button for franchise
+            document.getElementById('adminBtn').style.display = 'none';
         }
 
         function loginAdmin() {
@@ -541,7 +504,7 @@
                 if (response.success) {
                     document.getElementById('screen1').classList.remove('active');
                     document.getElementById('screen2').classList.add('active');
-                    document.getElementById('adminFloatingBtn').style.display = 'block'; // Show admin button for admin
+                    document.getElementById('adminBtn').style.display = 'block';
                 } else {
                     document.getElementById('adminMsg').innerText = response.message;
                 }
@@ -567,3 +530,4 @@
     </script>
 </body>
 </html>
+
