@@ -57,14 +57,20 @@ io.on('connection', (socket) => {
     // Current state synchronize karna
     socket.emit('syncState', { auctionState });
 
-    // Admin Login
-    socket.emit('loginAdmin', ({ password }, callback) => {
+        // Admin Login
+    socket.on('loginAdmin', (data, callback) => {
+        const password = data && data.password ? data.password : '';
         if (password === 'valle123') {
-            callback({ success: true });
+            if (typeof callback === 'function') {
+                callback({ success: true });
+            }
         } else {
-            callback({ success: false, message: 'Incorrect Password!' });
+            if (typeof callback === 'function') {
+                callback({ success: false, message: 'Incorrect Password!' });
+            }
         }
     });
+    
 
     // Auction Start Karna (Automatic Random Player Flow)
     socket.on('startAuction', () => {
