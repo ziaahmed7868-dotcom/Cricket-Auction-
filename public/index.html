@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Cricket Auction</title>
+    <title>VALLE DEL CIELO - Cricket Auction</title>
     <!-- Google Fonts for Professional Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
@@ -17,35 +17,35 @@
             justify-content: center;
             align-items: center;
             /* Default Auction Theme Background */
-            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), 
+            background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.5)), 
                         url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
         }
 
         .container {
-            width: 100%;
-            max-width: 850px; /* Box ki width ko aur optimum bada kiya gaya hai */
-            padding: 25px;
+            width: 92%; /* Screen ke dono kinaron par thoda space chhod kar poora wide */
+            max-width: 950px; /* Box ki maximum width ko aur bada kiya gaya hai */
+            padding: 15px;
             box-sizing: border-box;
         }
 
         .card {
-            background: rgba(30, 41, 59, 0.65);
-            backdrop-filter: blur(12px);
-            padding: 45px; /* Padding ko badhaya gaya hai taaki box khula-khula lage */
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(30, 41, 59, 0.40); /* Bahut zyada transparent taaki peeche ka background achhe se dikhe */
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
         }
 
         /* Editable Title Styling with Premium Font */
         .editable-title {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 700;
             color: #38bdf8;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             letter-spacing: 0.5px;
             outline: none;
             border-bottom: 2px dashed transparent;
@@ -56,13 +56,13 @@
         }
 
         .input-group {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
         label {
             font-size: 15px;
-            color: #94a3b8;
+            color: #cbd5e1;
             margin-bottom: 8px;
             display: block;
             font-weight: 600;
@@ -72,8 +72,8 @@
             width: 100%;
             padding: 16px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(15, 23, 42, 0.4); /* Inputs bhi transparent rakhe gaye hain */
             color: #fff;
             font-size: 16px;
             box-sizing: border-box;
@@ -126,8 +126,8 @@
         .divider {
             border: 0;
             height: 1px;
-            background: rgba(255, 255, 255, 0.15);
-            margin: 30px 0;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 25px 0;
         }
 
         #auctionArea { display: none; }
@@ -174,14 +174,14 @@
             <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
             
             <!-- Displaying Selected Retention Info inside Auction Screen -->
-            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.15); padding: 12px; border-radius: 10px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 15px; font-weight: 600;">
+            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.2); padding: 12px; border-radius: 10px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 15px; font-weight: 600;">
                 🛡️ Team: <span id="displayTeamName" style="color: #fff;"></span> | Retained Player: <span id="retainedPlayerName" style="color: #fff;">None</span>
             </div>
 
-            <div id="playerBox" style="background: rgba(15, 23, 42, 0.5); padding: 25px; border-radius: 16px; margin-top: 20px;">
+            <div id="playerBox" style="background: rgba(15, 23, 42, 0.4); padding: 25px; border-radius: 16px; margin-top: 20px;">
                 <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
                 <h3 id="playerName" style="font-size: 22px; margin: 10px 0;">Waiting for Auction to Start...</h3>
-                <p id="playerRole" style="color: #94a3b8; font-size: 16px;"></p>
+                <p id="playerRole" style="color: #cbd5e1; font-size: 16px;"></p>
                 <p style="font-size: 16px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
                 <h2 style="color: #4ade80; margin: 15px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
                 <p style="font-size: 16px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
@@ -193,7 +193,7 @@
             </div>
 
             <!-- Admin Control Buttons -->
-            <div id="adminControls" style="display:none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px;">
+            <div id="adminControls" style="display:none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
                 <h3 style="font-size: 18px; color: #cbd5e1; margin-bottom: 15px;">Admin Controls</h3>
                 <button class="btn" style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
                 <button class="btn" style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
