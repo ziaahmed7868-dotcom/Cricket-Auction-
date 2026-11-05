@@ -3,294 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VALLE DEL CIELO - Cricket Auction</title>
-    <!-- Google Fonts for Professional Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="/socket.io/socket.io.js"></script>
+    <title>CPL Auction App</title>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b1a2b 0%, #1a365d 50%, #0b1a2b 100%);
+            color: #fff;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Default Auction Theme Background */
-            background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.5)), 
-                        url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
-            background-size: cover;
+            padding: 15px;
+        }
+
+        /* Views Toggle Handling */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* SCREEN 1: RETENTION / LOGIN UI */
+        .setup-card {
+            background: rgba(10, 20, 35, 0.95);
+            border: 2px solid #3182ce;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 163, 255, 0.3);
+            text-align: center;
+            gap: 20px;
+        }
+
+        .setup-card h1 {
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .form-group label {
+            color: #cbd5e0;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #4a5568;
+            background: #0d1117;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .btn-proceed {
+            background: linear-gradient(90deg, #2b6cb0 0%, #3182ce 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-proceed:hover {
+            box-shadow: 0 0 15px rgba(49, 130, 206, 0.8);
+        }
+
+        /* SCREEN 2: AUCTION DASHBOARD UI */
+        .auction-container {
+            background: rgba(10, 20, 35, 0.85);
+            border: 2px solid #3182ce;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 163, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        /* Live Bidding Bar */
+        .live-bidding-bar {
+            background: linear-gradient(90deg, #003311 0%, #006622 50%, #003311 100%);
+            border: 2px solid #ffd700;
+            border-radius: 30px;
+            padding: 10px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .bid-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 1px;
+        }
+
+        .bid-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .team-badge {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid #ffd700;
+            font-weight: bold;
             color: #fff;
         }
 
-        .container {
-            width: 92%;
-            max-width: 950px;
-            padding: 15px;
-            box-sizing: border-box;
+        /* Main Stage Layout */
+        .main-stage {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .card {
-            background: rgba(30, 41, 59, 0.40);
-            backdrop-filter: blur(10px);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* Player Card */
+        .player-card {
+            flex: 2;
+            background: radial-gradient(circle, #1a202c 0%, #0d1117 100%);
+            border: 2px solid #d69e2e;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(214, 158, 46, 0.2);
+        }
+
+        .player-img {
+            width: 140px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #cbd5e0;
+        }
+
+        .player-details h2 {
+            font-size: 1.6rem;
+            color: #ecc94b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .player-details p {
+            font-size: 1rem;
+            margin: 4px 0;
+            color: #e2e8f0;
+        }
+
+        /* Pie Timer */
+        .timer-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #4a5568;
+        }
+
+        .pie-timer {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: conic-gradient(#e53e3e 0% 20%, #2d3748 20% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(229, 62, 62, 0.5);
+        }
+
+        .timer-inner {
+            width: 85px;
+            height: 85px;
+            background: #0a1423;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Team Bid Info */
+        .team-bid-info {
+            background: linear-gradient(90deg, #742a2a 0%, #9b2c2c 50%, #742a2a 100%);
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 10px;
             text-align: center;
         }
 
-        /* Editable Title Styling with Premium Font */
-        .editable-title {
-            font-size: 30px;
-            font-weight: 700;
-            color: #38bdf8;
-            margin-bottom: 25px;
-            letter-spacing: 0.5px;
-            outline: none;
-            border-bottom: 2px dashed transparent;
-            transition: all 0.3s ease;
-        }
-        .editable-title:focus {
-            border-bottom: 2px dashed #38bdf8;
+        .team-bid-info h3 {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 4px;
         }
 
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
+        .team-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.95rem;
+            color: #e2e8f0;
         }
 
-        label {
-            font-size: 15px;
-            color: #cbd5e1;
-            margin-bottom: 8px;
+        /* Purse Tracker Bar */
+        .purse-bar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .purse-card {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .remaining-purse {
+            background: #1c4532;
+            border: 1px solid #48bb78;
+            color: #9ae6b4;
+        }
+
+        .spent-purse {
+            background: #742a2a;
+            border: 1px solid #f56565;
+            color: #feb2b2;
+        }
+
+        /* Team Player Counter (Bottom Grid) */
+        .counter-grid {
+            background: #0d1117;
+            border: 1px solid #d69e2e;
+            border-radius: 8px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .counter-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #2d3748;
+        }
+
+        .counter-label {
+            font-size: 0.75rem;
+            color: #a0aec0;
             display: block;
-            font-weight: 600;
         }
 
-        input, select {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            background: rgba(15, 23, 42, 0.4);
+        .counter-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ecc94b;
+        }
+
+        .counter-total {
+            background: #742a2a;
+            border-color: #e53e3e;
+        }
+
+        .admin-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #4a5568;
             color: #fff;
-            font-size: 16px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, select:focus {
-            border-color: #38bdf8;
-        }
-
-        /* Dropdown options styling */
-        select option {
-            background: #1e293b;
-            color: #fff;
-        }
-
-        /* Modern Professional Buttons */
-        .btn {
-            width: 100%;
-            padding: 16px;
-            margin-top: 10px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
+            border: 1px solid #cbd5e0;
+            padding: 6px 14px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-weight: bold;
+            font-size: 0.85rem;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            transform: translateY(-1px);
-        }
-
-        .divider {
-            border: 0;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.2);
-            margin: 25px 0;
-        }
-
-        #auctionArea { display: none; }
-        .player-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid #38bdf8; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- 1st Screen: Login & Setup Panel -->
-        <div class="card" id="loginCard">
-            <!-- Editable Title -->
-            <div class="editable-title" contenteditable="true" title="Click to edit title">VALLE DEL CIELO Live Cricket Auction</div>
-
-            <div class="input-group">
-                <label>Enter Team Name (For Franchise / Admin Team)</label>
-                <input type="text" id="teamNameInput" placeholder="e.g. MI, KKR, RCB">
-            </div>
-
-            <!-- Player Retention Dropdown -->
-            <div class="input-group">
-                <label>🛡️ Select Retention Player (Optional)</label>
-                <select id="retentionDropdown">
-                    <option value="">-- No Retention / Direct Entry --</option>
-                    <option value="Player A">Player A (Retained)</option>
-                    <option value="Player B">Player B (Retained)</option>
-                    <option value="Player C">Player C (Retained)</option>
+    <!-- SCREEN 1: TEAM SELECTION / RETENTION SETUP -->
+    <div id="screen1" class="screen active">
+        <div class="setup-card">
+            <h1>CPL AUCTION SETUP</h1>
+            <p style="color: #a0aec0; margin-bottom: 15px;">Select Franchise & Configure Retention</p>
+            
+            <div class="form-group">
+                <label for="teamSelect">Select Team / Franchise:</label>
+                <select id="teamSelect">
+                    <option value="KINGS ELEVEN PUNJAB">KINGS ELEVEN PUNJAB</option>
+                    <option value="MUMBAI INDIANS">MUMBAI INDIANS</option>
+                    <option value="CHENNAI SUPER KINGS">CHENNAI SUPER KINGS</option>
                 </select>
             </div>
 
-            <!-- Retention Price Flexible Input Box -->
-            <div class="input-group">
-                <label>💰 Retention Price (CR)</label>
-                <input type="number" step="0.1" id="retentionPriceInput" placeholder="Enter retention amount (e.g. 5.0)">
+            <div class="form-group">
+                <label for="retentionPrice">Custom Retention Amount (in CR):</label>
+                <input type="number" id="retentionPrice" placeholder="Enter retention price (e.g. 10)" value="10">
             </div>
 
-            <button class="btn btn-primary" onclick="joinAuction()">Enter as Franchise</button>
-
-            <hr class="divider">
-
-            <div class="input-group">
-                <label>Admin Password (If Auctioneer)</label>
-                <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
-            </div>
-            <button class="btn btn-danger" onclick="loginAdmin()">Login as Admin & Team</button>
-        </div>
-
-        <!-- Auction Screen Area (Hidden initially) -->
-        <div class="card" id="auctionArea">
-            <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
-            
-            <!-- Displaying Selected Retention Info inside Auction Screen -->
-            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.2); padding: 12px; border-radius: 10px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 15px; font-weight: 600;">
-                🛡️ Team: <span id="displayTeamName" style="color: #fff;"></span> | Retention: <span id="retainedPlayerName" style="color: #fff;">None</span> (<span id="retainedPlayerPrice" style="color: #4ade80;">0 CR</span>)
-            </div>
-
-            <div id="playerBox" style="background: rgba(15, 23, 42, 0.4); padding: 25px; border-radius: 16px; margin-top: 20px;">
-                <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
-                <h3 id="playerName" style="font-size: 22px; margin: 10px 0;">Waiting for Auction to Start...</h3>
-                <p id="playerRole" style="color: #cbd5e1; font-size: 16px;"></p>
-                <p style="font-size: 16px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
-                <h2 style="color: #4ade80; margin: 15px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
-                <p style="font-size: 16px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
-            </div>
-
-            <!-- Team Bid Button -->
-            <div id="bidControls" style="display:none; margin-top: 25px;">
-                <button class="btn" style="background: #22c55e; font-size: 18px;" onclick="placeBid()">PLACE BID 🚀</button>
-            </div>
-
-            <!-- Admin Control Buttons -->
-            <div id="adminControls" style="display:none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
-                <h3 style="font-size: 18px; color: #cbd5e1; margin-bottom: 15px;">Admin Controls</h3>
-                <button class="btn" style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
-                <button class="btn" style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
-                <button class="btn" style="background: #f59e0b;" onclick="stopAuction()">Pause Auction</button>
-            </div>
+            <button class="btn-proceed" onclick="switchToAuctionScreen()">Go to Live Auction Screen</button>
         </div>
     </div>
 
+    <!-- SCREEN 2: MAIN LIVE AUCTION DASHBOARD -->
+    <div id="screen2" class="screen">
+        <div class="auction-container">
+            
+            <!-- Live Bidding Header -->
+            <div class="live-bidding-bar">
+                <div class="bid-title">LIVE BIDDING BAR</div>
+                <div class="bid-amount">CURRENT BID: <span id="currentBid">6.5 CR</span></div>
+                <div class="team-badge" id="leadingTeam">KINGS ELEVEN PUNJAB</div>
+            </div>
+
+            <!-- Main Stage: Player Card + Timer -->
+            <div class="main-stage">
+                <div class="player-card">
+                    <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="player-img" id="playerImg">
+                    <div class="player-details">
+                        <h2 id="playerName">ARJUN SHARMA</h2>
+                        <p><strong>ROLE:</strong> <span id="playerRole">ALL-ROUNDER (AR)</span></p>
+                        <p><strong>ORIGIN:</strong> <span id="playerOrigin">OVERSEAS (AUS)</span></p>
+                        <p><strong>BASE PRICE:</strong> <span id="basePrice">1.0 CR</span></p>
+                    </div>
+                </div>
+
+                <div class="timer-box">
+                    <span style="font-size: 0.85rem; margin-bottom: 6px; color: #a0aec0;">PIE-STYLE TIMER</span>
+                    <div class="pie-timer">
+                        <div class="timer-inner" id="timerValue">02</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Bid Info -->
+            <div class="team-bid-info">
+                <h3 id="currentTeamBidName">TEAM BID - KINGS ELEVEN PUNJAB</h3>
+                <div class="team-stats">
+                    <span>MAXIMUM BID (MAB): <strong id="mabValue">12.0 CR</strong></span>
+                    <span>PLAYER COUNTER: <strong id="squadCount">3/15</strong></span>
+                </div>
+            </div>
+
+            <!-- Purse Bar -->
+            <div class="purse-bar">
+                <div class="purse-card remaining-purse">
+                    REMAINING PURSE: <span id="remainingPurse">43.5 CR</span>
+                </div>
+                <div class="purse-card spent-purse">
+                    PURSE SPENT: <span id="spentPurse">46.5 CR</span>
+                </div>
+            </div>
+
+            <!-- Player Counter Bottom Bar -->
+            <div class="counter-grid">
+                <div class="counter-item">
+                    <span class="counter-label">BAT</span>
+                    <span class="counter-value" id="cntBat">1</span>
+                </div>
+                <div class="counter-item">
+                    <span class="counter-label">BOWL</span>
+                    <span class="counter-value" id="cntBowl">0</span>
+                </div>
+                <div class="counter-item">
+                    <span class="counter-label">WK</span>
+                    <span class="counter-value" id="cntWk">1</span>
+                </div>
+                <div class="counter-item">
+                    <span class="counter-label">AR</span>
+                    <span class="counter-value" id="cntAr">1</span>
+                </div>
+                <div class="counter-item">
+                    <span class="counter-label">DOM</span>
+                    <span class="counter-value" id="cntDom">2</span>
+                </div>
+                <div class="counter-item">
+                    <span class="counter-label">OVS</span>
+                    <span class="counter-value" id="cntOvs">1</span>
+                </div>
+                <div class="counter-item counter-total">
+                    <span class="counter-label" style="color: #fff;">TOTAL</span>
+                    <span class="counter-value" style="color: #fff;" id="cntTotal">3/15</span>
+                </div>
+            </div>
+
+            <button class="admin-btn">ADMIN</button>
+
+        </div>
+    </div>
+
+    <!-- JavaScript for Screen Switch -->
     <script>
-        const socket = io();
-        let myTeam = "";
-        let selectedRetention = "";
-        let retentionPrice = 0;
-        let isAdmin = false;
-
-        function joinAuction() {
-            myTeam = document.getElementById('teamNameInput').value.trim();
-            selectedRetention = document.getElementById('retentionDropdown').value;
-            retentionPrice = document.getElementById('retentionPriceInput').value;
-
-            if(!myTeam) { alert("Please enter your team name first!"); return; }
-
-            document.getElementById('loginCard').style.display = 'none';
-            document.getElementById('auctionArea').style.display = 'block';
-            document.getElementById('roleTitle').innerText = "Franchise: " + myTeam;
-            document.getElementById('bidControls').style.display = 'block';
-
-            document.getElementById('selectedRetentionDisplay').style.display = 'block';
-            document.getElementById('displayTeamName').innerText = myTeam;
-            document.getElementById('retainedPlayerName').innerText = selectedRetention ? selectedRetention : "None";
-            document.getElementById('retainedPlayerPrice').innerText = retentionPrice ? retentionPrice + " CR" : "0 CR";
-        }
-
-        function loginAdmin() {
-            myTeam = document.getElementById('teamNameInput').value.trim();
-            selectedRetention = document.getElementById('retentionDropdown').value;
-            retentionPrice = document.getElementById('retentionPriceInput').value;
-            const password = document.getElementById('adminPassInput').value;
-
-            if(!myTeam) { alert("Please enter your team name before logging in as Admin!"); return; }
-
-            socket.emit('loginAdmin', { password }, (response) => {
-                if(response.success) {
-                    isAdmin = true;
-                    document.getElementById('loginCard').style.display = 'none';
-                    document.getElementById('auctionArea').style.display = 'block';
-                    document.getElementById('roleTitle').innerText = "Admin Control Room & Team: " + myTeam;
-                    
-                    document.getElementById('adminControls').style.display = 'block';
-                    document.getElementById('bidControls').style.display = 'block';
-
-                    document.getElementById('selectedRetentionDisplay').style.display = 'block';
-                    document.getElementById('displayTeamName').innerText = myTeam;
-                    document.getElementById('retainedPlayerName').innerText = selectedRetention ? selectedRetention : "None";
-                    document.getElementById('retainedPlayerPrice').innerText = retentionPrice ? retentionPrice + " CR" : "0 CR";
-                } else {
-                    alert(response.message);
-                }
-            });
-        }
-
-        function placeBid() {
-            if(!myTeam) return alert("Team name missing!");
-            socket.emit('placeBid', { teamName: myTeam });
-        }
-
-        function startAuction() { socket.emit('startAuction'); }
-        function stopAuction() { socket.emit('stopAuction'); }
-        function nextPlayer() { socket.emit('nextPlayer'); }
-
-        socket.on('syncState', (data) => { updateUI(data.auctionState); });
-        socket.on('bidUpdated', (auctionState) => { updateUI(auctionState); });
-        socket.on('auctionStarted', (auctionState) => { updateUI(auctionState); });
-
-        function updateUI(auctionState) {
-            if(auctionState && auctionState.currentPlayer) {
-                document.getElementById('playerName').innerText = auctionState.currentPlayer.name;
-                document.getElementById('playerRole').innerText = "Role: " + auctionState.currentPlayer.role;
-                document.getElementById('playerBase').innerText = auctionState.currentPlayer.basePrice;
-                document.getElementById('currentBid').innerText = auctionState.currentBid || auctionState.currentPlayer.basePrice;
-                document.getElementById('leadingTeam').innerText = auctionState.leadingTeam || "None";
-                
-                let img = document.getElementById('playerPhoto');
-                if(auctionState.currentPlayer.photo) {
-                    img.src = auctionState.currentPlayer.photo;
-                    img.style.display = 'inline-block';
-                } else {
-                    img.style.display = 'none';
-                }
-            }
+        function switchToAuctionScreen() {
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
         }
     </script>
 </body>
 </html>
+
