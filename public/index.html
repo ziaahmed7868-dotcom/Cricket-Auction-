@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPL Auction App</title>
+    <title>CPL Live Auction App</title>
     <style>
         * {
             box-sizing: border-box;
@@ -22,7 +22,6 @@
             padding: 15px;
         }
 
-        /* Views Toggle Handling */
         .screen {
             display: none;
             width: 100%;
@@ -34,66 +33,97 @@
             flex-direction: column;
         }
 
-        /* SCREEN 1: RETENTION / LOGIN UI */
-        .setup-card {
+        /* SCREEN 1: ORIGINAL RETENTION & SETUP UI */
+        .setup-container {
             background: rgba(10, 20, 35, 0.95);
             border: 2px solid #3182ce;
             border-radius: 16px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 0 30px rgba(0, 163, 255, 0.3);
-            text-align: center;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
-        .setup-card h1 {
+        .setup-container h1 {
             color: #ffd700;
-            font-size: 2rem;
-            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #4a5568;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .card-box h3 {
+            color: #63b3ed;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
         }
 
         .form-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-            margin-bottom: 15px;
-            width: 100%;
+            margin-bottom: 12px;
         }
 
         .form-group label {
+            display: block;
+            font-size: 0.9rem;
             color: #cbd5e0;
-            font-size: 0.95rem;
-            font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        .form-group input, .form-group select {
+        .form-group select, .form-group input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 6px;
             border: 1px solid #4a5568;
             background: #0d1117;
             color: #fff;
-            font-size: 1rem;
         }
 
-        .btn-proceed {
-            background: linear-gradient(90deg, #2b6cb0 0%, #3182ce 100%);
+        .btn {
+            background: #3182ce;
             color: #fff;
             border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
+            width: 100%;
+            transition: 0.2s;
         }
 
-        .btn-proceed:hover {
-            box-shadow: 0 0 15px rgba(49, 130, 206, 0.8);
+        .btn:hover {
+            background: #2b6cb0;
         }
 
-        /* SCREEN 2: AUCTION DASHBOARD UI */
+        .retention-list {
+            max-height: 150px;
+            overflow-y: auto;
+            background: #0d1117;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .retention-item {
+            padding: 5px;
+            border-bottom: 1px solid #1a202c;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* SCREEN 2: BROADCAST AUCTION DASHBOARD UI */
         .auction-container {
             background: rgba(10, 20, 35, 0.85);
             border: 2px solid #3182ce;
@@ -106,7 +136,6 @@
             position: relative;
         }
 
-        /* Live Bidding Bar */
         .live-bidding-bar {
             background: linear-gradient(90deg, #003311 0%, #006622 50%, #003311 100%);
             border: 2px solid #ffd700;
@@ -141,7 +170,6 @@
             color: #fff;
         }
 
-        /* Main Stage Layout */
         .main-stage {
             display: flex;
             gap: 20px;
@@ -149,7 +177,6 @@
             justify-content: space-between;
         }
 
-        /* Player Card */
         .player-card {
             flex: 2;
             background: radial-gradient(circle, #1a202c 0%, #0d1117 100%);
@@ -183,7 +210,6 @@
             color: #e2e8f0;
         }
 
-        /* Pie Timer */
         .timer-box {
             flex: 1;
             display: flex;
@@ -220,7 +246,6 @@
             color: #fff;
         }
 
-        /* Team Bid Info */
         .team-bid-info {
             background: linear-gradient(90deg, #742a2a 0%, #9b2c2c 50%, #742a2a 100%);
             border: 1px solid #feb2b2;
@@ -242,7 +267,6 @@
             color: #e2e8f0;
         }
 
-        /* Purse Tracker Bar */
         .purse-bar {
             display: flex;
             gap: 15px;
@@ -269,7 +293,6 @@
             color: #feb2b2;
         }
 
-        /* Team Player Counter (Bottom Grid) */
         .counter-grid {
             background: #0d1117;
             border: 1px solid #d69e2e;
@@ -322,42 +345,58 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: TEAM SELECTION / RETENTION SETUP -->
+    <!-- SCREEN 1: FRANCHISE & RETENTION SETUP -->
     <div id="screen1" class="screen active">
-        <div class="setup-card">
-            <h1>CPL AUCTION SETUP</h1>
-            <p style="color: #a0aec0; margin-bottom: 15px;">Select Franchise & Configure Retention</p>
-            
-            <div class="form-group">
-                <label for="teamSelect">Select Team / Franchise:</label>
-                <select id="teamSelect">
-                    <option value="KINGS ELEVEN PUNJAB">KINGS ELEVEN PUNJAB</option>
-                    <option value="MUMBAI INDIANS">MUMBAI INDIANS</option>
-                    <option value="CHENNAI SUPER KINGS">CHENNAI SUPER KINGS</option>
-                </select>
-            </div>
+        <div class="setup-container">
+            <h1>CPL AUCTION & RETENTION SETUP</h1>
+            <div class="setup-grid">
+                
+                <!-- Franchise Login Box -->
+                <div class="card-box">
+                    <h3>Franchise Portal</h3>
+                    <div class="form-group">
+                        <label>Select Your Team:</label>
+                        <select id="teamSelect" onchange="fetchRetentionPlayers()">
+                            <option value="KINGS ELEVEN PUNJAB">KINGS ELEVEN PUNJAB</option>
+                            <option value="MUMBAI INDIANS">MUMBAI INDIANS</option>
+                            <option value="CHENNAI SUPER KINGS">CHENNAI SUPER KINGS</option>
+                            <option value="ROYAL CHALLENGERS BANGALORE">ROYAL CHALLENGERS BANGALORE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Retained Players Preview:</label>
+                        <div class="retention-list" id="retentionList">
+                            <span style="color: #a0aec0; font-size: 0.85rem;">Loading retention data...</span>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="goToAuctionScreen()">Enter Live Auction</button>
+                </div>
 
-            <div class="form-group">
-                <label for="retentionPrice">Custom Retention Amount (in CR):</label>
-                <input type="number" id="retentionPrice" placeholder="Enter retention price (e.g. 10)" value="10">
-            </div>
+                <!-- Admin Control Box -->
+                <div class="card-box">
+                    <h3>Admin Login</h3>
+                    <div class="form-group">
+                        <label>Admin Password:</label>
+                        <input type="password" id="adminPass" placeholder="Enter admin password">
+                    </div>
+                    <button class="btn" style="background: #e53e3e; margin-top: 15px;" onclick="loginAdmin()">Login as Admin</button>
+                    <div id="adminMsg" style="margin-top: 10px; font-size: 0.85rem; color: #fc8181;"></div>
+                </div>
 
-            <button class="btn-proceed" onclick="switchToAuctionScreen()">Go to Live Auction Screen</button>
+            </div>
         </div>
     </div>
 
-    <!-- SCREEN 2: MAIN LIVE AUCTION DASHBOARD -->
+    <!-- SCREEN 2: LIVE BROADCAST AUCTION DASHBOARD -->
     <div id="screen2" class="screen">
         <div class="auction-container">
             
-            <!-- Live Bidding Header -->
             <div class="live-bidding-bar">
                 <div class="bid-title">LIVE BIDDING BAR</div>
                 <div class="bid-amount">CURRENT BID: <span id="currentBid">6.5 CR</span></div>
                 <div class="team-badge" id="leadingTeam">KINGS ELEVEN PUNJAB</div>
             </div>
 
-            <!-- Main Stage: Player Card + Timer -->
             <div class="main-stage">
                 <div class="player-card">
                     <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="player-img" id="playerImg">
@@ -377,7 +416,6 @@
                 </div>
             </div>
 
-            <!-- Team Bid Info -->
             <div class="team-bid-info">
                 <h3 id="currentTeamBidName">TEAM BID - KINGS ELEVEN PUNJAB</h3>
                 <div class="team-stats">
@@ -386,7 +424,6 @@
                 </div>
             </div>
 
-            <!-- Purse Bar -->
             <div class="purse-bar">
                 <div class="purse-card remaining-purse">
                     REMAINING PURSE: <span id="remainingPurse">43.5 CR</span>
@@ -396,49 +433,72 @@
                 </div>
             </div>
 
-            <!-- Player Counter Bottom Bar -->
             <div class="counter-grid">
-                <div class="counter-item">
-                    <span class="counter-label">BAT</span>
-                    <span class="counter-value" id="cntBat">1</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">BOWL</span>
-                    <span class="counter-value" id="cntBowl">0</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">WK</span>
-                    <span class="counter-value" id="cntWk">1</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">AR</span>
-                    <span class="counter-value" id="cntAr">1</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">DOM</span>
-                    <span class="counter-value" id="cntDom">2</span>
-                </div>
-                <div class="counter-item">
-                    <span class="counter-label">OVS</span>
-                    <span class="counter-value" id="cntOvs">1</span>
-                </div>
-                <div class="counter-item counter-total">
-                    <span class="counter-label" style="color: #fff;">TOTAL</span>
-                    <span class="counter-value" style="color: #fff;" id="cntTotal">3/15</span>
-                </div>
+                <div class="counter-item"><span class="counter-label">BAT</span><span class="counter-value" id="cntBat">1</span></div>
+                <div class="counter-item"><span class="counter-label">BOWL</span><span class="counter-value" id="cntBowl">0</span></div>
+                <div class="counter-item"><span class="counter-label">WK</span><span class="counter-value" id="cntWk">1</span></div>
+                <div class="counter-item"><span class="counter-label">AR</span><span class="counter-value" id="cntAr">1</span></div>
+                <div class="counter-item"><span class="counter-label">DOM</span><span class="counter-value" id="cntDom">2</span></div>
+                <div class="counter-item"><span class="counter-label">OVS</span><span class="counter-value" id="cntOvs">1</span></div>
+                <div class="counter-item counter-total"><span class="counter-label" style="color: #fff;">TOTAL</span><span class="counter-value" style="color: #fff;" id="cntTotal">3/15</span></div>
             </div>
 
-            <button class="admin-btn">ADMIN</button>
+            <button class="admin-btn" onclick="goToSetupScreen()">SETUP / BACK</button>
 
         </div>
     </div>
 
-    <!-- JavaScript for Screen Switch -->
+    <!-- Socket.io & Logic Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        function switchToAuctionScreen() {
+        const socket = io();
+
+        function fetchRetentionPlayers() {
+            const team = document.getElementById('teamSelect').value;
+            fetch(`/api/retention-players?team=${encodeURIComponent(team)}`)
+                .then(res => res.json())
+                .then(data => {
+                    const listContainer = document.getElementById('retentionList');
+                    listContainer.innerHTML = '';
+                    if (data.length === 0) {
+                        listContainer.innerHTML = '<div style="color: #a0aec0; padding: 5px;">No retention players found.</div>';
+                        return;
+                    }
+                    data.forEach(p => {
+                        const name = p['Player Name'] || p['Name'] || 'Unknown';
+                        const price = p['Retention Price'] || p['Price'] || '-';
+                        listContainer.innerHTML += `<div class="retention-item"><span>${name}</span><strong>${price} CR</strong></div>`;
+                    });
+                })
+                .catch(err => console.error('Error fetching retention:', err));
+        }
+
+        function goToAuctionScreen() {
             document.getElementById('screen1').classList.remove('active');
             document.getElementById('screen2').classList.add('active');
         }
+
+        function goToSetupScreen() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            socket.emit('loginAdmin', { password: pass }, (response) => {
+                if (response.success) {
+                    alert('Admin Login Successful!');
+                    goToAuctionScreen();
+                } else {
+                    document.getElementById('adminMsg').innerText = response.message;
+                }
+            });
+        }
+
+        // Initial load fetch
+        window.onload = () => {
+            fetchRetentionPlayers();
+        };
     </script>
 </body>
 </html>
