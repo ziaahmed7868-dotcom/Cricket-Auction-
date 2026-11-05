@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VALLE DEL CIELO - Cricket Auction</title>
+    <title> Cricket Auction</title>
     <!-- Google Fonts for Professional Typography -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
@@ -25,27 +25,27 @@
 
         .container {
             width: 100%;
-            max-width: 650px;
-            padding: 20px;
+            max-width: 850px; /* Box ki width ko aur optimum bada kiya gaya hai */
+            padding: 25px;
             box-sizing: border-box;
         }
 
         .card {
             background: rgba(30, 41, 59, 0.65);
             backdrop-filter: blur(12px);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            padding: 45px; /* Padding ko badhaya gaya hai taaki box khula-khula lage */
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.15);
             text-align: center;
         }
 
         /* Editable Title Styling with Premium Font */
         .editable-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             color: #38bdf8;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             letter-spacing: 0.5px;
             outline: none;
             border-bottom: 2px dashed transparent;
@@ -56,12 +56,12 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             text-align: left;
         }
 
         label {
-            font-size: 14px;
+            font-size: 15px;
             color: #94a3b8;
             margin-bottom: 8px;
             display: block;
@@ -70,8 +70,8 @@
 
         input, select {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(15, 23, 42, 0.5);
             color: #fff;
@@ -94,9 +94,9 @@
         /* Modern Professional Buttons */
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             margin-top: 10px;
-            border-radius: 10px;
+            border-radius: 12px;
             border: none;
             font-size: 16px;
             font-weight: 600;
@@ -127,7 +127,7 @@
             border: 0;
             height: 1px;
             background: rgba(255, 255, 255, 0.15);
-            margin: 25px 0;
+            margin: 30px 0;
         }
 
         #auctionArea { display: none; }
@@ -174,27 +174,27 @@
             <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
             
             <!-- Displaying Selected Retention Info inside Auction Screen -->
-            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 14px; font-weight: 600;">
+            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.15); padding: 12px; border-radius: 10px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 15px; font-weight: 600;">
                 🛡️ Team: <span id="displayTeamName" style="color: #fff;"></span> | Retained Player: <span id="retainedPlayerName" style="color: #fff;">None</span>
             </div>
 
-            <div id="playerBox" style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; margin-top: 15px;">
+            <div id="playerBox" style="background: rgba(15, 23, 42, 0.5); padding: 25px; border-radius: 16px; margin-top: 20px;">
                 <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
-                <h3 id="playerName" style="font-size: 20px; margin: 10px 0;">Waiting for Auction to Start...</h3>
-                <p id="playerRole" style="color: #94a3b8; font-size: 15px;"></p>
-                <p style="font-size: 15px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
+                <h3 id="playerName" style="font-size: 22px; margin: 10px 0;">Waiting for Auction to Start...</h3>
+                <p id="playerRole" style="color: #94a3b8; font-size: 16px;"></p>
+                <p style="font-size: 16px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
                 <h2 style="color: #4ade80; margin: 15px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
-                <p style="font-size: 15px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
+                <p style="font-size: 16px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
             </div>
 
             <!-- Team Bid Button -->
-            <div id="bidControls" style="display:none; margin-top: 20px;">
+            <div id="bidControls" style="display:none; margin-top: 25px;">
                 <button class="btn" style="background: #22c55e; font-size: 18px;" onclick="placeBid()">PLACE BID 🚀</button>
             </div>
 
             <!-- Admin Control Buttons -->
-            <div id="adminControls" style="display:none; margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px;">
-                <h3 style="font-size: 16px; color: #cbd5e1; margin-bottom: 15px;">Admin Controls</h3>
+            <div id="adminControls" style="display:none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px;">
+                <h3 style="font-size: 18px; color: #cbd5e1; margin-bottom: 15px;">Admin Controls</h3>
                 <button class="btn" style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
                 <button class="btn" style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
                 <button class="btn" style="background: #f59e0b;" onclick="stopAuction()">Pause Auction</button>
@@ -238,7 +238,6 @@
                     document.getElementById('auctionArea').style.display = 'block';
                     document.getElementById('roleTitle').innerText = "Admin Control Room & Team: " + myTeam;
                     
-                    // Admin ke paas controls ke sath-sath bid button bhi enable kar sakte hain agar wo khud bhi khelega
                     document.getElementById('adminControls').style.display = 'block';
                     document.getElementById('bidControls').style.display = 'block';
 
