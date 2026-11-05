@@ -4,55 +4,199 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VALLE DEL CIELO - Cricket Auction</title>
+    <!-- Google Fonts for Professional Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; text-align: center; }
-        .card { background: #1e293b; padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        input, select, button { padding: 12px; margin: 10px 0; width: 85%; border-radius: 5px; border: none; font-size: 16px; box-sizing: border-box; }
-        button { background: #3b82f6; color: white; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2563eb; }
-        #auctionArea, #bidControls, #adminControls { display: none; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Default Auction Theme Background / Clip Hanger Setup */
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Editable Title Styling with Premium Font */
+        .editable-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            outline: none;
+            border-bottom: 2px dashed transparent;
+            transition: all 0.3s ease;
+        }
+        .editable-title:focus {
+            border-bottom: 2px dashed #38bdf8;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.6);
+            color: #fff;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #38bdf8;
+        }
+
+        /* Modern Professional Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+        }
+
+        /* Background Changer Hanger Panel Styling */
+        .bg-changer {
+            margin-top: 20px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            text-align: left;
+        }
+
+        .divider {
+            border: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+        }
+
+        #auctionArea { display: none; }
         .player-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid #38bdf8; }
     </style>
 </head>
 <body>
 
-    <h1>VALLE DEL CIELO - Live Cricket Auction</h1>
+    <div class="container">
+        <!-- 1st Screen: Login & Setup Panel -->
+        <div class="card" id="loginCard">
+            <!-- Editable Title -->
+            <div class="editable-title" contenteditable="true" title="Click to edit title">VALLE DEL CIELO Live Cricket Auction</div>
 
-    <div class="card" id="loginCard">
-        <h3>Join Auction Room</h3>
-        <input type="text" id="teamNameInput" placeholder="Enter Team Name (e.g. MI, KKR)">
-        <br>
-        <button onclick="joinAuction()">Enter as Franchise</button>
-        <hr style="border: 0.5px solid #334155; margin: 15px 0;">
-        <h3>Admin Panel Login</h3>
-        <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
-        <br>
-        <button style="background: #ef4444;" onclick="loginAdmin()">Login as Admin</button>
-    </div>
+            <div class="input-group">
+                <label>Enter Team Name (Franchise)</label>
+                <input type="text" id="teamNameInput" placeholder="e.g. MI, KKR, RCB">
+            </div>
+            <button class="btn btn-primary" onclick="joinAuction()">Enter as Franchise</button>
 
-    <div class="card" id="auctionArea">
-        <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
-        <div id="playerBox" style="background: #334155; padding: 15px; border-radius: 8px; margin-top: 15px;">
-            <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
-            <h3 id="playerName">Waiting for Auction to Start...</h3>
-            <p id="playerRole" style="color: #94a3b8;"></p>
-            <p>Base Price: <span id="playerBase">0</span> CR</p>
-            <h2 style="color: #4ade80; margin: 10px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
-            <p>Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
+            <hr class="divider">
+
+            <div class="input-group">
+                <label>Admin Password</label>
+                <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
+            </div>
+            <button class="btn btn-danger" onclick="loginAdmin()">Login as Admin</button>
+
+            <!-- Background Image Clip Hanger / Changer -->
+            <div class="bg-changer">
+                <label style="color: #38bdf8; font-weight: 600;">🖼️ Background Poster Hanger</label>
+                <input type="text" id="bgUrlInput" placeholder="Paste image URL here..." style="font-size: 13px; padding: 10px; margin-top: 5px;">
+                <button class="btn" style="background: #475569; font-size: 14px; padding: 10px; margin-top: 8px;" onclick="changeBackground()">Apply Background</button>
+            </div>
         </div>
 
-        <!-- Team Bid Button -->
-        <div id="bidControls">
-            <button style="background: #22c55e; font-size: 18px; margin-top: 15px;" onclick="placeBid()">PLACE BID 🚀</button>
-        </div>
+        <!-- Auction Screen Area (Hidden initially) -->
+        <div class="card" id="auctionArea">
+            <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
+            <div id="playerBox" style="background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
+                <h3 id="playerName">Waiting for Auction to Start...</h3>
+                <p id="playerRole" style="color: #94a3b8;"></p>
+                <p>Base Price: <span id="playerBase">0</span> CR</p>
+                <h2 style="color: #4ade80; margin: 10px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
+                <p>Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
+            </div>
 
-        <!-- Admin Control Buttons -->
-        <div id="adminControls" style="margin-top: 20px; border-top: 1px solid #475569; padding-top: 15px;">
-            <h3>Admin Controls</h3>
-            <button style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
-            <button style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
-            <button style="background: #f59e0b;" onclick="stopAuction()">Pause Auction</button>
+            <!-- Franchise Retention View Panel -->
+            <div id="retentionPanel" style="display:none; margin-top: 15px; background: rgba(15, 23, 42, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 15px;">🛡️ Team Retention Status</h4>
+                <p style="font-size: 13px; color: #94a3b8; margin: 0;">Retained players list & status will appear here.</p>
+            </div>
+
+            <!-- Team Bid Button -->
+            <div id="bidControls" style="display:none;">
+                <button class="btn" style="background: #22c55e; font-size: 18px;" onclick="placeBid()">PLACE BID 🚀</button>
+            </div>
+
+            <!-- Admin Control Buttons -->
+            <div id="adminControls" style="display:none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <h3 style="font-size: 16px; color: #cbd5e1;">Admin Controls</h3>
+                <button class="btn" style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
+                <button class="btn" style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
+                <button class="btn" style="background: #f59e0b;" onclick="stopAuction()">Pause Auction</button>
+            </div>
         </div>
     </div>
 
@@ -61,6 +205,17 @@
         let myTeam = "";
         let isAdmin = false;
 
+        // Background Hanger Functionality
+        function changeBackground() {
+            const url = document.getElementById('bgUrlInput').value.trim();
+            if(url) {
+                document.body.style.background = `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('${url}') no-repeat center center fixed`;
+                document.body.style.backgroundSize = 'cover';
+            } else {
+                alert("Please enter a valid image URL!");
+            }
+        }
+
         function joinAuction() {
             myTeam = document.getElementById('teamNameInput').value.trim();
             if(!myTeam) { alert("Please enter team name!"); return; }
@@ -68,6 +223,7 @@
             document.getElementById('auctionArea').style.display = 'block';
             document.getElementById('roleTitle').innerText = "Franchise: " + myTeam;
             document.getElementById('bidControls').style.display = 'block';
+            document.getElementById('retentionPanel').style.display = 'block';
         }
 
         function loginAdmin() {
@@ -94,17 +250,9 @@
         function stopAuction() { socket.emit('stopAuction'); }
         function nextPlayer() { socket.emit('nextPlayer'); }
 
-        socket.on('syncState', (data) => {
-            updateUI(data.auctionState);
-        });
-
-        socket.on('bidUpdated', (auctionState) => {
-            updateUI(auctionState);
-        });
-
-        socket.on('auctionStarted', (auctionState) => {
-            updateUI(auctionState);
-        });
+        socket.on('syncState', (data) => { updateUI(data.auctionState); });
+        socket.on('bidUpdated', (auctionState) => { updateUI(auctionState); });
+        socket.on('auctionStarted', (auctionState) => { updateUI(auctionState); });
 
         function updateUI(auctionState) {
             if(auctionState && auctionState.currentPlayer) {
@@ -126,3 +274,5 @@
     </script>
 </body>
 </html>
+
+        
