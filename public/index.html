@@ -25,13 +25,13 @@
 
         .container {
             width: 100%;
-            max-width: 650px; /* Box ko aur zyada bada aur wide kiya gaya hai */
+            max-width: 650px;
             padding: 20px;
             box-sizing: border-box;
         }
 
         .card {
-            background: rgba(30, 41, 59, 0.65); /* Zyada transparent banaya gaya hai */
+            background: rgba(30, 41, 59, 0.65);
             backdrop-filter: blur(12px);
             padding: 35px;
             border-radius: 20px;
@@ -81,8 +81,14 @@
             transition: border-color 0.3s;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: #38bdf8;
+        }
+
+        /* Dropdown options styling */
+        select option {
+            background: #1e293b;
+            color: #fff;
         }
 
         /* Modern Professional Buttons */
@@ -137,23 +143,41 @@
             <div class="editable-title" contenteditable="true" title="Click to edit title">VALLE DEL CIELO Live Cricket Auction</div>
 
             <div class="input-group">
-                <label>Enter Team Name (Franchise)</label>
+                <label>Enter Team Name (For Franchise / Admin Team)</label>
                 <input type="text" id="teamNameInput" placeholder="e.g. MI, KKR, RCB">
             </div>
+
+            <!-- Player Retention Dropdown for Everyone -->
+            <div class="input-group">
+                <label>🛡️ Select Retention Player (Optional)</label>
+                <select id="retentionDropdown">
+                    <option value="">-- No Retention / Direct Entry --</option>
+                    <option value="Player A">Player A (Retained)</option>
+                    <option value="Player B">Player B (Retained)</option>
+                    <option value="Player C">Player C (Retained)</option>
+                </select>
+            </div>
+
             <button class="btn btn-primary" onclick="joinAuction()">Enter as Franchise</button>
 
             <hr class="divider">
 
             <div class="input-group">
-                <label>Admin Password</label>
+                <label>Admin Password (If Auctioneer)</label>
                 <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
             </div>
-            <button class="btn btn-danger" onclick="loginAdmin()">Login as Admin</button>
+            <button class="btn btn-danger" onclick="loginAdmin()">Login as Admin & Team</button>
         </div>
 
         <!-- Auction Screen Area (Hidden initially) -->
         <div class="card" id="auctionArea">
             <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
+            
+            <!-- Displaying Selected Retention Info inside Auction Screen -->
+            <div id="selectedRetentionDisplay" style="display:none; margin-bottom: 15px; background: rgba(56, 189, 248, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #38bdf8; color: #38bdf8; font-size: 14px; font-weight: 600;">
+                🛡️ Team: <span id="displayTeamName" style="color: #fff;"></span> | Retained Player: <span id="retainedPlayerName" style="color: #fff;">None</span>
+            </div>
+
             <div id="playerBox" style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; margin-top: 15px;">
                 <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
                 <h3 id="playerName" style="font-size: 20px; margin: 10px 0;">Waiting for Auction to Start...</h3>
@@ -161,17 +185,6 @@
                 <p style="font-size: 15px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
                 <h2 style="color: #4ade80; margin: 15px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
                 <p style="font-size: 15px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
-            </div>
-
-            <!-- Franchise Retention View Panel (Ab yeh saaf aur prominent nazar aayega) -->
-            <div id="retentionPanel" style="display:none; margin-top: 20px; background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.4); text-align: left;">
-                <h4 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px;">🛡️ Team Player Retention</h4>
-                <div id="retentionContent" style="font-size: 14px; color: #cbd5e1;">
-                    <p style="margin: 0 0 8px 0; color: #94a3b8;">Retained Players List:</p>
-                    <ul id="retainedPlayersList" style="margin: 0; padding-left: 20px; color: #f8fafc;">
-                        <li>No players retained yet.</li>
-                    </ul>
-                </div>
             </div>
 
             <!-- Team Bid Button -->
@@ -192,27 +205,46 @@
     <script>
         const socket = io();
         let myTeam = "";
+        let selectedRetention = "";
         let isAdmin = false;
 
         function joinAuction() {
             myTeam = document.getElementById('teamNameInput').value.trim();
-            if(!myTeam) { alert("Please enter team name!"); return; }
+            selectedRetention = document.getElementById('retentionDropdown').value;
+
+            if(!myTeam) { alert("Please enter your team name first!"); return; }
+
             document.getElementById('loginCard').style.display = 'none';
             document.getElementById('auctionArea').style.display = 'block';
             document.getElementById('roleTitle').innerText = "Franchise: " + myTeam;
             document.getElementById('bidControls').style.display = 'block';
-            document.getElementById('retentionPanel').style.display = 'block';
+
+            document.getElementById('selectedRetentionDisplay').style.display = 'block';
+            document.getElementById('displayTeamName').innerText = myTeam;
+            document.getElementById('retainedPlayerName').innerText = selectedRetention ? selectedRetention : "None";
         }
 
         function loginAdmin() {
+            myTeam = document.getElementById('teamNameInput').value.trim();
+            selectedRetention = document.getElementById('retentionDropdown').value;
             const password = document.getElementById('adminPassInput').value;
+
+            if(!myTeam) { alert("Please enter your team name before logging in as Admin!"); return; }
+
             socket.emit('loginAdmin', { password }, (response) => {
                 if(response.success) {
                     isAdmin = true;
                     document.getElementById('loginCard').style.display = 'none';
                     document.getElementById('auctionArea').style.display = 'block';
-                    document.getElementById('roleTitle').innerText = "Admin Control Room (Auctioneer)";
+                    document.getElementById('roleTitle').innerText = "Admin Control Room & Team: " + myTeam;
+                    
+                    // Admin ke paas controls ke sath-sath bid button bhi enable kar sakte hain agar wo khud bhi khelega
                     document.getElementById('adminControls').style.display = 'block';
+                    document.getElementById('bidControls').style.display = 'block';
+
+                    document.getElementById('selectedRetentionDisplay').style.display = 'block';
+                    document.getElementById('displayTeamName').innerText = myTeam;
+                    document.getElementById('retainedPlayerName').innerText = selectedRetention ? selectedRetention : "None";
                 } else {
                     alert(response.message);
                 }
@@ -220,7 +252,7 @@
         }
 
         function placeBid() {
-            if(!myTeam) return alert("Join with a team name first!");
+            if(!myTeam) return alert("Team name missing!");
             socket.emit('placeBid', { teamName: myTeam });
         }
 
