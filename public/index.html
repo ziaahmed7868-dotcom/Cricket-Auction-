@@ -430,23 +430,6 @@
         </div>
     </div>
 
-    <!-- SCREEN 1.5: ADMIN RETENTION REVIEW & CONFIRMATION SCREEN -->
-    <div id="screenAdminRetention" class="screen">
-        <div class="setup-container">
-            <h1>ADMIN RETENTION REVIEW</h1>
-            <p style="color: #cbd5e0; font-size: 0.9rem; text-align: center;">Sabhi franchises ke retentions yahan check karein:</p>
-            
-            <div class="card-box">
-                <h3>All Teams Retention Overview</h3>
-                <div class="retention-list" id="allRetentionList" style="max-height: 250px;">
-                    <!-- Dynamically populated retention items -->
-                </div>
-            </div>
-
-            <button class="btn" style="background: #38a169; margin-top: 10px;" onclick="goToAuctionAsAdmin()">NEXT -> Enter Auction Dashboard</button>
-        </div>
-    </div>
-
     <!-- SCREEN 2: LIVE BROADCAST AUCTION DASHBOARD -->
     <div id="screen2" class="screen" style="max-width: 1100px;">
         <div class="auction-container">
@@ -525,7 +508,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let isAdmin = false;
 
         function fetchRetentionPlayers() {
             const team = document.getElementById('teamSelect').value;
@@ -548,31 +530,40 @@
         }
 
         function goToAuctionAsFranchise() {
-            isAdmin = false;
             document.getElementById('screen1').classList.remove('active');
             document.getElementById('screen2').classList.add('active');
-            document.getElementById('adminFloatingBtn').style.display = 'none';
+            document.getElementById('adminFloatingBtn').style.display = 'none'; // Hide admin button for franchise
         }
 
         function loginAdmin() {
             const pass = document.getElementById('adminPass').value;
             socket.emit('loginAdmin', { password: pass }, (response) => {
                 if (response.success) {
-                    isAdmin = true;
                     document.getElementById('screen1').classList.remove('active');
-                    document.getElementById('screenAdminRetention').classList.add('active');
-                    loadAllRetentionsForAdmin();
+                    document.getElementById('screen2').classList.add('active');
+                    document.getElementById('adminFloatingBtn').style.display = 'block'; // Show admin button for admin
                 } else {
                     document.getElementById('adminMsg').innerText = response.message;
                 }
             });
         }
 
-        function loadAllRetentionsForAdmin() {
-            fetch(`/api/retention-players?team=KINGS ELEVEN PUNJAB`)
-                .then(res => res.json())
-                .then(data => {
-                    const listContainer = document.getElementById('allRetentionList');
-                    listContainer.innerHTML = '<div style="color: #63b3ed; font-weight: bold; margin-bottom: 5px;">KINGS ELEVEN PUNJAB RETENTIONS:</div>';
-                    if (data.length === 0) {
-        
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function adminAction(actionName) {
+            alert('Admin Action Triggered: ' + actionName);
+            closeAdminModal();
+        }
+
+        window.onload = () => {
+            fetchRetentionPlayers();
+        };
+    </script>
+</body>
+</html>
