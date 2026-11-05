@@ -16,8 +16,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Default Auction Theme Background / Clip Hanger Setup */
-            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+            /* Default Auction Theme Background */
+            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), 
                         url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
@@ -25,24 +25,24 @@
 
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 650px; /* Box ko aur zyada bada aur wide kiya gaya hai */
             padding: 20px;
             box-sizing: border-box;
         }
 
         .card {
-            background: rgba(30, 41, 59, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.65); /* Zyada transparent banaya gaya hai */
+            backdrop-filter: blur(12px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             text-align: center;
         }
 
         /* Editable Title Styling with Premium Font */
         .editable-title {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             color: #38bdf8;
             margin-bottom: 25px;
@@ -56,25 +56,26 @@
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
         label {
-            font-size: 13px;
+            font-size: 14px;
             color: #94a3b8;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             display: block;
+            font-weight: 600;
         }
 
         input, select {
             width: 100%;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.5);
             color: #fff;
-            font-size: 15px;
+            font-size: 16px;
             box-sizing: border-box;
             outline: none;
             transition: border-color 0.3s;
@@ -87,9 +88,9 @@
         /* Modern Professional Buttons */
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             margin-top: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
             font-size: 16px;
             font-weight: 600;
@@ -116,21 +117,11 @@
             transform: translateY(-1px);
         }
 
-        /* Background Changer Hanger Panel Styling */
-        .bg-changer {
-            margin-top: 20px;
-            background: rgba(15, 23, 42, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            text-align: left;
-        }
-
         .divider {
             border: 0;
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 25px 0;
         }
 
         #auctionArea { display: none; }
@@ -158,41 +149,39 @@
                 <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
             </div>
             <button class="btn btn-danger" onclick="loginAdmin()">Login as Admin</button>
-
-            <!-- Background Image Clip Hanger / Changer -->
-            <div class="bg-changer">
-                <label style="color: #38bdf8; font-weight: 600;">🖼️ Background Poster Hanger</label>
-                <input type="text" id="bgUrlInput" placeholder="Paste image URL here..." style="font-size: 13px; padding: 10px; margin-top: 5px;">
-                <button class="btn" style="background: #475569; font-size: 14px; padding: 10px; margin-top: 8px;" onclick="changeBackground()">Apply Background</button>
-            </div>
         </div>
 
         <!-- Auction Screen Area (Hidden initially) -->
         <div class="card" id="auctionArea">
             <h2 id="roleTitle" style="color: #38bdf8; margin-top: 5px;">Welcome</h2>
-            <div id="playerBox" style="background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <div id="playerBox" style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; margin-top: 15px;">
                 <img id="playerPhoto" src="" class="player-img" style="display:none;" alt="Player">
-                <h3 id="playerName">Waiting for Auction to Start...</h3>
-                <p id="playerRole" style="color: #94a3b8;"></p>
-                <p>Base Price: <span id="playerBase">0</span> CR</p>
-                <h2 style="color: #4ade80; margin: 10px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
-                <p>Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
+                <h3 id="playerName" style="font-size: 20px; margin: 10px 0;">Waiting for Auction to Start...</h3>
+                <p id="playerRole" style="color: #94a3b8; font-size: 15px;"></p>
+                <p style="font-size: 15px;">Base Price: <span id="playerBase" style="font-weight: 600;">0</span> CR</p>
+                <h2 style="color: #4ade80; margin: 15px 0;">Current Bid: <span id="currentBid">0</span> CR</h2>
+                <p style="font-size: 15px;">Leading Team: <strong id="leadingTeam" style="color: #facc15;">None</strong></p>
             </div>
 
-            <!-- Franchise Retention View Panel -->
-            <div id="retentionPanel" style="display:none; margin-top: 15px; background: rgba(15, 23, 42, 0.7); padding: 12px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">
-                <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 15px;">🛡️ Team Retention Status</h4>
-                <p style="font-size: 13px; color: #94a3b8; margin: 0;">Retained players list & status will appear here.</p>
+            <!-- Franchise Retention View Panel (Ab yeh saaf aur prominent nazar aayega) -->
+            <div id="retentionPanel" style="display:none; margin-top: 20px; background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.4); text-align: left;">
+                <h4 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px;">🛡️ Team Player Retention</h4>
+                <div id="retentionContent" style="font-size: 14px; color: #cbd5e1;">
+                    <p style="margin: 0 0 8px 0; color: #94a3b8;">Retained Players List:</p>
+                    <ul id="retainedPlayersList" style="margin: 0; padding-left: 20px; color: #f8fafc;">
+                        <li>No players retained yet.</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Team Bid Button -->
-            <div id="bidControls" style="display:none;">
+            <div id="bidControls" style="display:none; margin-top: 20px;">
                 <button class="btn" style="background: #22c55e; font-size: 18px;" onclick="placeBid()">PLACE BID 🚀</button>
             </div>
 
             <!-- Admin Control Buttons -->
-            <div id="adminControls" style="display:none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <h3 style="font-size: 16px; color: #cbd5e1;">Admin Controls</h3>
+            <div id="adminControls" style="display:none; margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px;">
+                <h3 style="font-size: 16px; color: #cbd5e1; margin-bottom: 15px;">Admin Controls</h3>
                 <button class="btn" style="background: #10b981;" onclick="startAuction()">Start / Resume Auction</button>
                 <button class="btn" style="background: #6366f1;" onclick="nextPlayer()">Next Player ➡️</button>
                 <button class="btn" style="background: #f59e0b;" onclick="stopAuction()">Pause Auction</button>
@@ -204,17 +193,6 @@
         const socket = io();
         let myTeam = "";
         let isAdmin = false;
-
-        // Background Hanger Functionality
-        function changeBackground() {
-            const url = document.getElementById('bgUrlInput').value.trim();
-            if(url) {
-                document.body.style.background = `linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('${url}') no-repeat center center fixed`;
-                document.body.style.backgroundSize = 'cover';
-            } else {
-                alert("Please enter a valid image URL!");
-            }
-        }
 
         function joinAuction() {
             myTeam = document.getElementById('teamNameInput').value.trim();
@@ -274,5 +252,3 @@
     </script>
 </body>
 </html>
-
-        
