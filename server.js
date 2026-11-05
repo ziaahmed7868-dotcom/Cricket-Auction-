@@ -1,8 +1,9 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const fs = require('fs');
+const axios = require('axios');
 const csv = require('csv-parser');
+const { Readable } = require('stream');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,121 +11,102 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
-let players = [];
-let teams = [];
-let settings = {};
+// Teeno tabs ke separate CSV URLs
+const TEAMS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1_t8ZiQyA5ohoNgC4H6AY4yG1K0OTgEzLZIJNOg8yVMc/export?format=csv&gid=0';
+const PLAYERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1_t8ZiQyA5ohoNgC4H6AY4yG1K0OTgEzLZIJNOg8yVMc/export?format=csv&gid=790908491';
+const SETTINGS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1_t8ZiQyA5ohoNgC4H6AY4yG1K0OTgEzLZIJNOg8yVMc/export?format=csv&gid=1259568157';
+
+let teamsData = [];
+let playersData = [];
+let settingsData = [];
 
 let auctionState = {
-    isRunning: false,
-    currentPlayerIndex: 0,
     currentPlayer: null,
     currentBid: 0,
-    leadingTeam: null,
-    shuffledPlayers: []
+    leadingTeam: 'None',
+    status: 'idle'
 };
 
-// CSV Files Load karna
-function loadData() {
-    players = [];
-    fs.createReadStream('Player_Master.csv')
-        .pipe(csv())
-        .on('data', (row) => players.push(row))
-        .on('end', () => {
-            console.log(`Loaded ${players.length} players.`);
-            resetAuctionQueue();
-        });
+// Google Sheet ke sabhi tabs se live data fetch karne ka function
+async function fetchSheetData() {
+    try {
+        // 1. Fetch Teams Tab
+        const teamsRes = await axios.get(TEAMS_CSV_URL);
+        let tempTeams = [];
+        Readable.from(teamsRes.data).pipe(csv())
+            .on('data', (row) => tempTeams.push(row))
+            .on('end', () => { teamsData = tempTeams; });
 
-    teams = [];
-    if (fs.existsSync('Teams.csv')) {
-        fs.createReadStream('Teams.csv')
-            .pipe(csv())
-            .on('data', (row) => teams.push(row))
-            .on('end', () => console.log(`Loaded ${teams.length} teams.`));
+        // 2. Fetch Player Master Tab
+        const playersRes = await axios.get(PLAYERS_CSV_URL);
+        let tempPlayers = [];
+        Readable.from(playersRes.data).pipe(csv())
+            .on('data', (row) => tempPlayers.push(row))
+            .on('end', () => { playersData = tempPlayers; });
+
+        // 3. Fetch Settings Tab
+        const settingsRes = await axios.get(SETTINGS_CSV_URL);
+        let tempSettings = [];
+        Readable.from(settingsRes.data).pipe(csv())
+            .on('data', (row) => tempSettings.push(row))
+            .on('end', () => { 
+                settingsData = tempSettings;
+                console.log('All Google Sheet Tabs Synced Successfully!');
+            });
+
+    } catch (error) {
+        console.error('Error fetching Google Sheet data:', error.message);
     }
 }
 
-function resetAuctionQueue() {
-    // Players ko random shuffle karna (Automatic Random Appearance)
-    auctionState.shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
-    auctionState.currentPlayerIndex = 0;
-}
+// Initial Sync
+fetchSheetData();
+setInterval(fetchSheetData, 120000); // Har 2 minute mein auto-sync
 
-loadData();
+// API: Specific team ke retention players Column J ke mutabiq filter karna
+app.get('/api/retention-players', (req, res) => {
+    const teamName = req.query.team;
+    if (!teamName) return res.json([]);
 
+    const filteredPlayers = playersData.filter(player => {
+        const teamInColJ = player['Team'] || player['Team Name'] || player['Column J'] || '';
+        return teamInColJ.trim().toLowerCase() === teamName.trim().toLowerCase();
+    });
+
+    res.json(filteredPlayers);
+});
+
+// Socket.io Events
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
-    // Current state synchronize karna
     socket.emit('syncState', { auctionState });
 
-        // Admin Login
     socket.on('loginAdmin', (data, callback) => {
-        const password = data && data.password ? data.password : '';
-        if (password === 'valle123') {
-            if (typeof callback === 'function') {
-                callback({ success: true });
-            }
+        if (data.password === 'admin123') {
+            callback({ success: true });
         } else {
-            if (typeof callback === 'function') {
-                callback({ success: false, message: 'Incorrect Password!' });
-            }
+            callback({ success: false, message: 'Invalid Admin Password!' });
         }
     });
-    
 
-    // Auction Start Karna (Automatic Random Player Flow)
     socket.on('startAuction', () => {
-        auctionState.isRunning = true;
-        nextPlayer();
-    });
-
-    // Next Player Logic
-    function nextPlayer() {
-        if (auctionState.currentPlayerIndex < auctionState.shuffledPlayers.length) {
-            let p = auctionState.shuffledPlayers[auctionState.currentPlayerIndex];
-            auctionState.currentPlayer = {
-                id: p['Player ID'] || p['Player ID '],
-                name: p['Player Name'],
-                role: p['Role'],
-                basePrice: parseFloat(p['Base Price']) || 0.5,
-                photo: p['Player Photo'] || ''
-            };
-            auctionState.currentBid = auctionState.currentPlayer.basePrice;
-            auctionState.leadingTeam = 'None';
-            auctionState.currentPlayerIndex++;
-
-            io.emit('auctionStarted', auctionState);
-        } else {
-            auctionState.isRunning = false;
-            auctionState.currentPlayer = { name: 'Auction Completed!', role: '-', basePrice: 0 };
-            io.emit('auctionStarted', auctionState);
+        if (playersData.length > 0 && !auctionState.currentPlayer) {
+            auctionState.currentPlayer = playersData[0];
+            auctionState.currentBid = parseFloat(playersData[0]['Base Price'] || 0);
+            auctionState.status = 'running';
         }
-    }
-
-    // Place Bid Logic
-    socket.on('placeBid', ({ teamName }) => {
-        if (!auctionState.isRunning || !auctionState.currentPlayer) return;
-        
-        let increment = auctionState.currentBid >= 5 ? 0.5 : 0.1;
-        auctionState.currentBid = parseFloat((auctionState.currentBid + increment).toFixed(2));
-        auctionState.leadingTeam = teamName;
-
-        io.emit('bidUpdated', auctionState);
+        io.emit('auctionStarted', auctionState);
     });
 
-    socket.on('stopAuction', () => {
-        auctionState.isRunning = false;
-        io.emit('syncState', { auctionState });
-    });
-
-    socket.on('nextPlayer', () => {
-        if (auctionState.isRunning) {
-            nextPlayer();
+    socket.on('placeBid', (data) => {
+        if (auctionState.status === 'running') {
+            auctionState.currentBid += 0.5;
+            auctionState.leadingTeam = data.teamName;
+            io.emit('bidUpdated', auctionState);
         }
     });
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
