@@ -9,7 +9,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.static('public'));
 
 // Apps Script Web App URL
-const GAS_WEBAPP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE";
+const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx2SqrQYMLA50NvbiSBwg4m1sBB1tg_e-GGLGdW8PTLCDDE8jicPHQQlZ6RhFiWu3Drtg/exec";
 
 let teamsData = [];
 let playersData = [];
