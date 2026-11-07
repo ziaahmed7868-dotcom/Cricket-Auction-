@@ -8,8 +8,8 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(express.static('public'));
 
-// Apps Script Web App URL
-const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx2SqrQYMLA50NvbiSBwg4m1sBB1tg_e-GGLGdW8PTLCDDE8jicPHQQlZ6RhFiWu3Drtg/exec";
+// Apna deployed Google Apps Script Web App URL yahan paste karein
+const GAS_WEBAPP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE";
 
 let teamsData = [];
 let playersData = [];
@@ -20,7 +20,7 @@ let auctionState = {
     currentPlayer: null,
     currentBid: 0.5,
     highestBidder: "None",
-    status: "idle", // 'idle', 'running', 'paused', 'sold_overlay'
+    status: "idle", // 'idle', 'running', 'paused', 'sold_overlay', 'completed'
     isUnsoldRound: false,
     timer: 23,
     bidHistory: []
@@ -28,20 +28,18 @@ let auctionState = {
 
 let timerInterval = null;
 
-// Fetch Initial Data
+// Load Master Data from Google Sheets
 async function loadMasterData() {
     try {
         const res = await axios.get(`${GAS_WEBAPP_URL}?action=getInitialData`);
-        teamsData = res.data.teams;
-        playersData = res.data.players;
+        teamsData = res.data.teams || [];
+        playersData = res.data.players || [];
         
-        // Filter initial available players
-        availablePlayers = playersData.filter(p => p.Status === 'Available' || !p.Status);
-        // Shuffle for random draw
+        availablePlayers = playersData.filter(p => p.Status === 'Available' || !p.Status || p.Status === '');
         availablePlayers.sort(() => Math.random() - 0.5);
-        console.log(`Loaded ${availablePlayers.length} players successfully!`);
+        console.log(`Loaded ${teamsData.length} teams and ${availablePlayers.length} players successfully!`);
     } catch (e) {
-        console.error("Error fetching data:", e.message);
+        console.error("Error fetching data from Google Sheet:", e.message);
     }
 }
 loadMasterData();
@@ -91,11 +89,11 @@ async function finalizeCurrentPlayer() {
         team: auctionState.highestBidder 
     });
 
-    // Write back to Google Sheets via GAS
+    // Write back status to Google Sheet via Apps Script
     try {
         await axios.post(GAS_WEBAPP_URL, {
             action: 'updatePlayerStatus',
-            playerId: player['Player ID'],
+            playerId: player['Player ID'] || player.ID || player.Id,
             soldPrice: player.SoldPrice || 0,
             winingTeam: player.WiningTeam || 'Unsold',
             status: player.Status
@@ -138,14 +136,19 @@ io.on('connection', (socket) => {
     socket.emit('syncState', { auctionState, teamsData });
 
     socket.on('startAuction', () => {
-        if (auctionState.status === 'idle') {
-            drawNextPlayer();
+        if (auctionState.status === 'idle' || auctionState.status === 'paused') {
+            if (!auctionState.currentPlayer) {
+                drawNextPlayer();
+            } else {
+                auctionState.status = 'running';
+                startTimer();
+            }
         }
     });
 
     socket.on('placeBid', (data) => {
         if (auctionState.status !== 'running') return;
-        if (auctionState.highestBidder === data.teamName) return; // Block self-bidding
+        if (auctionState.highestBidder === data.teamName) return; // Self-bidding restriction
 
         const nextBidVal = (auctionState.highestBidder === "None") 
             ? auctionState.currentBid 
@@ -154,12 +157,12 @@ io.on('connection', (socket) => {
         auctionState.currentBid = nextBidVal;
         auctionState.highestBidder = data.teamName;
         auctionState.bidHistory.push({ team: data.teamName, bid: nextBidVal });
-        auctionState.timer = 23; // Reset timer to 23s on bid
+        auctionState.timer = 23; // Reset timer to 23s on successful bid
 
         io.emit('bidUpdated', { auctionState });
     });
 
-    // Admin Events
+    // Admin Control Actions
     socket.on('adminAction', (data) => {
         if (data.action === 'pause') {
             auctionState.status = 'paused';
@@ -185,7 +188,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Live Voice/Chat Broadcast
+    // Live Voice/Chat Message Broadcasting
     socket.on('sendChatMessage', (msgData) => {
         io.emit('receiveChatMessage', msgData);
     });
