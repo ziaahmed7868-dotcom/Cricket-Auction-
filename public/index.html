@@ -211,7 +211,6 @@
             color: #e2e8f0;
         }
 
-        /* Timer and Admin Container Side */
         .right-panel {
             flex: 1;
             display: flex;
@@ -301,7 +300,6 @@
             color: #feb2b2;
         }
 
-        /* Admin Button Positioned below timer */
         .admin-btn {
             background: #e53e3e;
             color: #fff;
@@ -315,6 +313,114 @@
             display: none;
             text-align: center;
             box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
+        }
+
+        /* SCREEN 3: SOLD / RESULT SCREEN DESIGN */
+        .sold-container {
+            background: rgba(10, 20, 35, 0.95);
+            border: 3px solid #ffd700;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            text-align: center;
+        }
+
+        .sold-header {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+
+        .sold-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .sold-player-card {
+            background: radial-gradient(circle, #1a202c 0%, #0d1117 100%);
+            border: 2px solid #d69e2e;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 260px;
+            text-align: left;
+        }
+
+        .sold-player-img {
+            width: 80px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .arrow-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            min-width: 180px;
+        }
+
+        .sold-price-tag {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #48bb78;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(72, 187, 120, 0.5);
+        }
+
+        .arrow-graphic {
+            font-size: 2.5rem;
+            color: #ffd700;
+            line-height: 1;
+            margin: 2px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .sold-text-badge {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #e53e3e;
+            background: rgba(229, 62, 62, 0.1);
+            border: 1px solid #e53e3e;
+            padding: 4px 15px;
+            border-radius: 20px;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .winning-team-box {
+            background: rgba(0, 51, 17, 0.8);
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            padding: 15px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .winning-team-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
         }
 
         /* Admin Control Modal */
@@ -366,7 +472,6 @@
             <h1>CPL AUCTION PORTAL</h1>
             <div class="setup-grid">
                 
-                <!-- Franchise Portal -->
                 <div class="card-box">
                     <h3>Franchise Portal</h3>
                     <div class="form-group">
@@ -387,7 +492,6 @@
                     <button class="btn" onclick="goToAuctionAsFranchise()">Enter Live Auction</button>
                 </div>
 
-                <!-- Admin Login -->
                 <div class="card-box">
                     <h3>Admin Login</h3>
                     <div class="form-group">
@@ -427,10 +531,9 @@
                     <div class="timer-box">
                         <span style="font-size: 0.85rem; margin-bottom: 6px; color: #a0aec0;">PIE-STYLE TIMER</span>
                         <div class="pie-timer">
-                            <div class="timer-inner" id="timerValue">02</div>
+                            <div class="timer-inner" id="timerValue">23</div>
                         </div>
                     </div>
-                    <!-- ADMIN BUTTON (Visible only for Admin below timer) -->
                     <button class="admin-btn" id="adminBtn" onclick="openAdminModal()">ADMIN CONTROLS</button>
                 </div>
             </div>
@@ -455,7 +558,60 @@
         </div>
     </div>
 
-    <!-- ADMIN CONTROLS MODAL -->
+    <!-- SCREEN 3: SOLD SCREEN -->
+    <div id="screenSold" class="screen">
+        <div class="sold-container">
+            <div class="sold-header">PLAYER AUCTION RESULT</div>
+            
+            <div class="sold-stage">
+                <div class="sold-player-card">
+                    <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="sold-player-img" id="soldPlayerImg">
+                    <div>
+                        <h3 id="soldPlayerName" style="font-size: 1.1rem; color: #ffd700;">ARJUN SHARMA</h3>
+                        <p id="soldPlayerRole" style="font-size: 0.85rem; color: #cbd5e0;">ALL-ROUNDER</p>
+                    </div>
+                </div>
+
+                <div class="arrow-section">
+                    <div class="sold-price-tag" id="soldPriceDisplay">6.5 CR</div>
+                    <div class="arrow-graphic">➔</div>
+                    <div class="sold-text-badge">SOLD</div>
+                </div>
+
+                <div class="winning-team-box">
+                    <span style="font-size: 0.75rem; color: #a0aec0; letter-spacing: 1px;">WINNING FRANCHISE</span>
+                    <div class="winning-team-name" id="winningTeamDisplay">KINGS ELEVEN PUNJAB</div>
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="soldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
+        </div>
+    </div>
+
+    <!-- SCREEN 3.5: UNSOLD SCREEN -->
+    <div id="screenUnsold" class="screen">
+        <div class="sold-container" style="border-color: #e53e3e; box-shadow: 0 0 40px rgba(229, 62, 62, 0.4);">
+            <div class="sold-header" style="color: #e53e3e;">PLAYER AUCTION RESULT</div>
+            
+            <div class="sold-stage">
+                <div class="sold-player-card">
+                    <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="sold-player-img" id="unsoldPlayerImg">
+                    <div>
+                        <h3 id="unsoldPlayerName" style="font-size: 1.1rem; color: #ffd700;">ARJUN SHARMA</h3>
+                        <p id="unsoldPlayerRole" style="font-size: 0.85rem; color: #cbd5e0;">ALL-ROUNDER</p>
+                    </div>
+                </div>
+
+                <div class="arrow-section">
+                    <div class="sold-text-badge" style="background: rgba(229, 62, 62, 0.2); color: #e53e3e;">REMAINS UNSOLD</div>
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="unsoldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
+        </div>
+    </div>
+
+       <!-- ADMIN CONTROLS MODAL -->
     <div id="adminModal" class="modal">
         <div class="modal-content">
             <h3>Admin Control Panel</h3>
@@ -471,6 +627,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        let inactivityTimer = null;
+        let countdownValue = 23;
 
         function fetchRetentionPlayers() {
             const team = document.getElementById('teamSelect').value;
@@ -496,6 +654,7 @@
             document.getElementById('screen1').classList.remove('active');
             document.getElementById('screen2').classList.add('active');
             document.getElementById('adminBtn').style.display = 'none';
+            startInactivityTimer();
         }
 
         function loginAdmin() {
@@ -505,10 +664,93 @@
                     document.getElementById('screen1').classList.remove('active');
                     document.getElementById('screen2').classList.add('active');
                     document.getElementById('adminBtn').style.display = 'block';
+                    startInactivityTimer();
                 } else {
                     document.getElementById('adminMsg').innerText = response.message;
                 }
             });
+        }
+
+        function startInactivityTimer() {
+            countdownValue = 23;
+            document.getElementById('timerValue').innerText = countdownValue;
+            
+            if (inactivityTimer) clearInterval(inactivityTimer);
+
+            inactivityTimer = setInterval(() => {
+                countdownValue--;
+                document.getElementById('timerValue').innerText = countdownValue < 10 ? '0' + countdownValue : countdownValue;
+
+                if (countdownValue <= 0) {
+                    clearInterval(inactivityTimer);
+                    const hasBids = true; 
+                    if (hasBids) {
+                        triggerSoldScreen();
+                    } else {
+                        triggerUnsoldScreen();
+                    }
+                }
+            }, 1000);
+        }
+
+        function triggerSoldScreen() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screenSold').classList.add('active');
+
+            const playerName = document.getElementById('playerName').innerText;
+            const winningTeam = document.getElementById('leadingTeam').innerText;
+            const finalBid = document.getElementById('currentBid').innerText;
+            
+            if ('speechSynthesis' in window) {
+                const speechText = `Player ${playerName} sold to ${winningTeam} for ${finalBid}`;
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            let disappearCount = 5;
+            document.getElementById('soldCountdown').innerText = disappearCount;
+
+            const disappearTimer = setInterval(() => {
+                disappearCount--;
+                document.getElementById('soldCountdown').innerText = disappearCount;
+
+                if (disappearCount <= 0) {
+                    clearInterval(disappearTimer);
+                    document.getElementById('screenSold').classList.remove('active');
+                    document.getElementById('screen2').classList.add('active');
+                    startInactivityTimer();
+                }
+            }, 1000);
+        }
+
+        function triggerUnsoldScreen() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screenUnsold').classList.add('active');
+
+            const playerName = document.getElementById('playerName').innerText;
+            
+            if ('speechSynthesis' in window) {
+                const speechText = `Player ${playerName} remains unsold`;
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            let disappearCount = 5;
+            document.getElementById('unsoldCountdown').innerText = disappearCount;
+
+            const disappearTimer = setInterval(() => {
+                disappearCount--;
+                document.getElementById('unsoldCountdown').innerText = disappearCount;
+
+                if (disappearCount <= 0) {
+                    clearInterval(disappearTimer);
+                    document.getElementById('screenUnsold').classList.remove('active');
+                    document.getElementById('screen2').classList.add('active');
+                    startInactivityTimer();
+                }
+            }, 1000);
         }
 
         function openAdminModal() {
