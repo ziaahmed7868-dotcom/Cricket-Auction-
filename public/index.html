@@ -51,14 +51,22 @@
     <div id="screen-login" class="screen active">
         <div class="box">
             <h2>VALLE DEL CIELO AUCTION</h2>
-            <select id="team-select" onchange="checkRetentionEligibility()">
-                <option value="">-- Choose Team / Admin --</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="MI">Mumbai Indians (MI)</option>
-                <option value="CSK">Chennai Super Kings (CSK)</option>
-                <option value="RCB">Royal Challengers (RCB)</option>
-                <option value="KKR">Kolkata Knight Riders (KKR)</option>
+            
+            <!-- Dynamic Team Dropdown loaded from Google Sheet 'Teams' tab -->
+            <select id="team-select" onchange="checkFormEligibility()">
+                <option value="">-- Select Your Team --</option>
             </select>
+
+            <!-- Admin Checkbox & Password Protection -->
+            <div style="margin: 15px 0; text-align: left; background: #0f172a; padding: 10px; border-radius: 6px;">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="admin-checkbox" onchange="toggleAdminPassword()" style="width: auto;">
+                    <span>Login as Admin / Auctioneer</span>
+                </label>
+                <div id="admin-password-box" style="display: none; margin-top: 10px;">
+                    <input type="password" id="admin-password-input" placeholder="Enter Admin Password">
+                </div>
+            </div>
 
             <button id="btn-retention-toggle" onclick="toggleRetentionBox()" style="display:none; background:#eab308; color:#000;">PLAYER RETENTION</button>
 
@@ -74,7 +82,6 @@
 
     <!-- SCREEN 2: LIVE AUCTION -->
     <div id="screen-dashboard" class="screen">
-        <!-- Central Card -->
         <div class="player-card">
             <!-- 20s Dynamic Pie + 3s Big Font -->
             <div class="timer-box">
@@ -97,7 +104,7 @@
             <!-- Single Team Personalized Bid Button -->
             <button id="main-bid-btn" class="bid-btn" onclick="placeBid()">BID FOR <span id="next-bid-val">0.5 CR</span></button>
 
-            <!-- Admin Buttons (If logged as Admin) -->
+            <!-- Admin Controls (Unlocked with Correct Password) -->
             <div id="admin-controls" style="display:none; grid-template-columns: 1fr 1fr; gap:5px; margin-top:15px;">
                 <button onclick="sendAdmin('pause')" style="background:#475569; color:#fff;">PAUSE</button>
                 <button onclick="sendAdmin('resume')" style="background:#475569; color:#fff;">RESUME</button>
@@ -133,23 +140,47 @@
     let currentUser = "";
     let isSystemAdmin = false;
     let auctionState = {};
+    let teamsList = [];
     let myPurse = 120.0;
     let mySquadCount = 0;
     let maxSquad = 17;
     let mabLimit = 0.5;
+    const ADMIN_SECRET_PASS = "valle123";
 
-    function checkRetentionEligibility() {
+    socket.on("syncState", (data) => {
+        auctionState = data.auctionState;
+        teamsList = data.teams;
+        
+        // Populate Team Dropdown dynamically from Google Sheet 'Teams' tab
+        const select = document.getElementById("team-select");
+        select.innerHTML = '<option value="">-- Select Your Team --</option>';
+        teamsList.forEach(team => {
+            let tName = team['Team Name'] || team.Name || team.Team;
+            if(tName) {
+                select.innerHTML += `<option value="${tName}">${tName}</option>`;
+            }
+        });
+        
+        updateUI(auctionState);
+    });
+
+    function checkFormEligibility() {
         currentUser = document.getElementById("team-select").value;
         const btnEnter = document.getElementById("btn-enter-auction");
         const btnRet = document.getElementById("btn-retention-toggle");
         
         if (currentUser) {
             btnEnter.disabled = false;
-            btnRet.style.display = (currentUser !== "ADMIN") ? "block" : "none";
+            btnRet.style.display = "block";
         } else {
             btnEnter.disabled = true;
             btnRet.style.display = "none";
         }
+    }
+
+    function toggleAdminPassword() {
+        const isChecked = document.getElementById("admin-checkbox").checked;
+        document.getElementById("admin-password-box").style.display = isChecked ? "block" : "none";
     }
 
     function toggleRetentionBox() {
@@ -166,7 +197,20 @@
     }
 
     function enterAuction() {
-        isSystemAdmin = (currentUser === "ADMIN");
+        currentUser = document.getElementById("team-select").value;
+        const isAdminChecked = document.getElementById("admin-checkbox").checked;
+
+        if (isAdminChecked) {
+            let enteredPass = document.getElementById("admin-password-input").value;
+            if (enteredPass !== ADMIN_SECRET_PASS) {
+                alert("Incorrect Admin Password!");
+                return;
+            }
+            isSystemAdmin = true;
+        } else {
+            isSystemAdmin = false;
+        }
+
         document.getElementById("screen-login").classList.remove("active");
         document.getElementById("screen-dashboard").classList.add("active");
 
@@ -176,8 +220,6 @@
         }
     }
 
-    // Socket Events
-    socket.on("syncState", (data) => { updateUI(data.auctionState); });
     socket.on("newPlayerDrawn", (data) => { updateUI(data.auctionState); });
     socket.on("bidUpdated", (data) => { updateUI(data.auctionState); });
 
@@ -187,7 +229,6 @@
         const offset = 283 - (t / 23) * 283;
         document.getElementById("timer-arc").style.strokeDashoffset = offset;
 
-        // Last 3 Seconds Audio Announcement
         if (t <= 3 && t > 0) {
             speakVoice(`${t}`);
         }
@@ -226,14 +267,12 @@
         document.getElementById("current-bid-val").textContent = `${state.currentBid.toFixed(1)} CR`;
         document.getElementById("highest-bidder-name").textContent = state.highestBidder;
 
-        // Calculate Next Bid
         let inc = (state.currentBid < 1.0) ? 0.1 : (state.currentBid < 5.0 ? 0.2 : 0.5);
         let nextVal = (state.highestBidder === "None") ? state.currentBid : +(state.currentBid + inc).toFixed(1);
         document.getElementById("next-bid-val").textContent = `${nextVal.toFixed(1)} CR`;
 
-        // 3 Safety Inactive Locks for Bid Button
         const bidBtn = document.getElementById("main-bid-btn");
-        if (currentUser === "ADMIN" || state.highestBidder === currentUser || mySquadCount >= maxSquad || (myPurse - nextVal) < mabLimit) {
+        if (state.highestBidder === currentUser || mySquadCount >= maxSquad || (myPurse - nextVal) < mabLimit) {
             bidBtn.disabled = true;
         } else {
             bidBtn.disabled = false;
@@ -278,4 +317,3 @@
 </script>
 </body>
 </html>
-
