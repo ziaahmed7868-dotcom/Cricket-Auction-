@@ -315,7 +315,7 @@
             box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
         }
 
-        /* SCREEN 3: SOLD / RESULT SCREEN DESIGN */
+        /* SCREEN 3: SOLD SCREEN */
         .sold-container {
             background: rgba(10, 20, 35, 0.95);
             border: 3px solid #ffd700;
@@ -423,7 +423,6 @@
             text-align: center;
         }
 
-        /* Admin Control Modal */
         .modal {
             display: none;
             position: fixed;
@@ -583,35 +582,8 @@
                     <div class="winning-team-name" id="winningTeamDisplay">KINGS ELEVEN PUNJAB</div>
                 </div>
             </div>
-
-            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="soldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
-        </div>
-    </div>
-
-    <!-- SCREEN 3.5: UNSOLD SCREEN -->
-    <div id="screenUnsold" class="screen">
-        <div class="sold-container" style="border-color: #e53e3e; box-shadow: 0 0 40px rgba(229, 62, 62, 0.4);">
-            <div class="sold-header" style="color: #e53e3e;">PLAYER AUCTION RESULT</div>
             
-            <div class="sold-stage">
-                <div class="sold-player-card">
-                    <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="sold-player-img" id="unsoldPlayerImg">
-                    <div>
-                        <h3 id="unsoldPlayerName" style="font-size: 1.1rem; color: #ffd700;">ARJUN SHARMA</h3>
-                        <p id="unsoldPlayerRole" style="font-size: 0.85rem; color: #cbd5e0;">ALL-ROUNDER</p>
-                    </div>
-                </div>
-
-                <div class="arrow-section">
-                    <div class="sold-text-badge" style="background: rgba(229, 62, 62, 0.2); color: #e53e3e;">REMAINS UNSOLD</div>
-                </div>
-            </div>
-
-            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="unsoldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
-        </div>
-    </div>
-
-       <!-- ADMIN CONTROLS MODAL -->
+                <!-- ADMIN CONTROLS MODAL -->
     <div id="adminModal" class="modal">
         <div class="modal-content">
             <h3>Admin Control Panel</h3>
@@ -693,6 +665,24 @@
             }, 1000);
         }
 
+        function speakAnnouncement(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.0;
+                utterance.lang = 'en-US';
+
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    const englishVoice = voices.find(v => v.lang.includes('en'));
+                    if (englishVoice) utterance.voice = englishVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function triggerSoldScreen() {
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screenSold').classList.add('active');
@@ -701,12 +691,7 @@
             const winningTeam = document.getElementById('leadingTeam').innerText;
             const finalBid = document.getElementById('currentBid').innerText;
             
-            if ('speechSynthesis' in window) {
-                const speechText = `Player ${playerName} sold to ${winningTeam} for ${finalBid}`;
-                const utterance = new SpeechSynthesisUtterance(speechText);
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            }
+            speakAnnouncement(`Player ${playerName} sold to ${winningTeam} for ${finalBid}`);
 
             let disappearCount = 5;
             document.getElementById('soldCountdown').innerText = disappearCount;
@@ -730,12 +715,7 @@
 
             const playerName = document.getElementById('playerName').innerText;
             
-            if ('speechSynthesis' in window) {
-                const speechText = `Player ${playerName} remains unsold`;
-                const utterance = new SpeechSynthesisUtterance(speechText);
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            }
+            speakAnnouncement(`Player ${playerName} remains unsold`);
 
             let disappearCount = 5;
             document.getElementById('unsoldCountdown').innerText = disappearCount;
@@ -768,8 +748,39 @@
 
         window.onload = () => {
             fetchRetentionPlayers();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
         };
     </script>
 </body>
-</html>
+        </html>
+            
 
+            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="soldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
+        </div>
+    </div>
+
+    <!-- SCREEN 3.5: UNSOLD SCREEN -->
+    <div id="screenUnsold" class="screen">
+        <div class="sold-container" style="border-color: #e53e3e; box-shadow: 0 0 40px rgba(229, 62, 62, 0.4);">
+            <div class="sold-header" style="color: #e53e3e;">PLAYER AUCTION RESULT</div>
+            
+            <div class="sold-stage">
+                <div class="sold-player-card">
+                    <img src="https://static.cricbuzz.com/a/img/v1/152x152/i1/c616517/virat-kohli.jpg" alt="Player" class="sold-player-img" id="unsoldPlayerImg">
+                    <div>
+                        <h3 id="unsoldPlayerName" style="font-size: 1.1rem; color: #ffd700;">ARJUN SHARMA</h3>
+                        <p id="unsoldPlayerRole" style="font-size: 0.85rem; color: #cbd5e0;">ALL-ROUNDER</p>
+                    </div>
+                </div>
+
+                <div class="arrow-section">
+                    <div class="sold-text-badge" style="background: rgba(229, 62, 62, 0.2); color: #e53e3e;">REMAINS UNSOLD</div>
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: #a0aec0;">Returning to live auction in <span id="unsoldCountdown" style="color: #ffd700; font-weight: bold;">5</span> seconds...</p>
+        </div>
+    </div>
+    
