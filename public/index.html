@@ -147,6 +147,29 @@
     let mabLimit = 0.5;
     const ADMIN_SECRET_PASS = "valle123";
 
+    window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const preTeam = urlParams.get('team');
+    const isParamAdmin = urlParams.get('admin') === 'true';
+    
+    if (preTeam) {
+        setTimeout(() => {
+            const select = document.getElementById("team-select");
+            select.value = preTeam;
+            checkFormEligibility();
+
+            if (isParamAdmin) {
+                // Admin ke liye: Checkbox tick kar do aur password box dikha do
+                document.getElementById("admin-checkbox").checked = true;
+                toggleAdminPassword();
+            } else {
+                // Normal Friend ke liye: Ek click me direct auction screen par bhej do
+                enterAuction();
+            }
+        }, 600); // 0.6 second delay taaki sheet ka data load hokar dropdown ban jaye
+    }
+});
+    
     socket.on("syncState", (data) => {
         auctionState = data.auctionState;
         teamsList = data.teams;
