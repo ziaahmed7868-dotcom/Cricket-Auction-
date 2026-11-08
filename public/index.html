@@ -184,13 +184,11 @@
 
 function enterAuction() {
     currentUser = document.getElementById("team-select").value;
-    // Password checking poori tarah se hata di gayi hai
     isSystemAdmin = document.getElementById("admin-checkbox").checked;
 
     document.getElementById("screen-login").classList.remove("active");
     document.getElementById("screen-dashboard").classList.add("active");
 
-    // Header label update
     const dashboard = document.getElementById("screen-dashboard");
     const existingHeader = document.getElementById("user-banner");
     if (existingHeader) existingHeader.remove();
@@ -206,24 +204,6 @@ function enterAuction() {
         socket.emit("startAuction");
     }
 }
-    
-    socket.on("syncState", (data) => {
-        auctionState = data.auctionState;
-        teamsList = data.teams;
-        
-        // Populate Team Dropdown dynamically from Google Sheet 'Teams' tab
-        const select = document.getElementById("team-select");
-        select.innerHTML = '<option value="">-- Select Your Team --</option>';
-        teamsList.forEach(team => {
-            let tName = team['Team Name'] || team.Name || team.Team;
-            if(tName) {
-                select.innerHTML += `<option value="${tName}">${tName}</option>`;
-            }
-        });
-        
-        updateUI(auctionState);
-    });
-
     function checkFormEligibility() {
         currentUser = document.getElementById("team-select").value;
         const btnEnter = document.getElementById("btn-enter-auction");
