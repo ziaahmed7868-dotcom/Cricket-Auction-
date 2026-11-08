@@ -153,22 +153,59 @@
     const isParamAdmin = urlParams.get('admin') === 'true';
     
     if (preTeam) {
-        setTimeout(() => {
+        const checkInterval = setInterval(() => {
             const select = document.getElementById("team-select");
-            select.value = preTeam;
-            checkFormEligibility();
+            if (select.options.length > 1) {
+                clearInterval(checkInterval);
+                
+                let matchedValue = "";
+                for (let option of select.options) {
+                    if (option.value.toLowerCase().includes(preTeam.toLowerCase())) {
+                        matchedValue = option.value;
+                        break;
+                    }
+                }
+                
+                if (matchedValue) {
+                    select.value = matchedValue;
+                    checkFormEligibility();
 
-            if (isParamAdmin) {
-                // Admin ke liye: Checkbox tick kar do aur password box dikha do
-                document.getElementById("admin-checkbox").checked = true;
-                toggleAdminPassword();
-            } else {
-                // Normal Friend ke liye: Ek click me direct auction screen par bhej do
-                enterAuction();
+                    if (isParamAdmin) {
+                        document.getElementById("admin-checkbox").checked = true;
+                    }
+                    
+                    // Bina kisi password ke seedha auction screen par entry
+                    enterAuction();
+                }
             }
-        }, 600); // 0.6 second delay taaki sheet ka data load hokar dropdown ban jaye
+        }, 200);
     }
 });
+
+function enterAuction() {
+    currentUser = document.getElementById("team-select").value;
+    // Password checking poori tarah se hata di gayi hai
+    isSystemAdmin = document.getElementById("admin-checkbox").checked;
+
+    document.getElementById("screen-login").classList.remove("active");
+    document.getElementById("screen-dashboard").classList.add("active");
+
+    // Header label update
+    const dashboard = document.getElementById("screen-dashboard");
+    const existingHeader = document.getElementById("user-banner");
+    if (existingHeader) existingHeader.remove();
+    
+    dashboard.insertAdjacentHTML('afterbegin', 
+        `<div id="user-banner" style="background:#1e293b; padding:8px; text-align:center; color:#38bdf8; font-weight:bold; border-radius:6px; margin-bottom:10px;">
+            Logged in as Team: ${currentUser} ${isSystemAdmin ? '(ADMIN)' : ''}
+        </div>`
+    );
+
+    if (isSystemAdmin) {
+        document.getElementById("admin-controls").style.display = "grid";
+        socket.emit("startAuction");
+    }
+}
     
     socket.on("syncState", (data) => {
         auctionState = data.auctionState;
